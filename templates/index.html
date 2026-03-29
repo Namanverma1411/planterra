@@ -1,0 +1,32 @@
+{% extends "base.html" %}
+
+{% block content %}
+<section class="hero fade-in">
+    <h1>Supercharge your productivity.<br>Powered by Planterra.</h1>
+    <p>Planterra organizes your life, analyzes your deadlines, and intelligently suggests what you should focus on next.</p>
+    <div class="hero-buttons">
+        <a href="{{ url_for('signup') }}" class="btn btn-primary" style="width: auto;">Get Started for Free</a>
+        <a href="{{ url_for('login') }}" class="btn outline" style="width: auto;">Log In</a>
+    </div>
+</section>
+
+<div class="nav-container" style="display: flex; gap: 2rem; margin-top: 4rem; margin-bottom: 4rem;">
+    <div class="stat-card fade-in delay-1" style="flex: 1; text-align: center; display: block;">
+        <i data-lucide="cloud" class="stat-icon blue mx-auto mb-2" style="margin: 0 auto; display: flex;"></i>
+        <h3>Cloud Synced</h3>
+        <p style="font-size: 1rem; color: var(--text-secondary); margin-top: 0.5rem; font-weight: normal;">Your tasks are securely stored on MongoDB Atlas and accessible anywhere.</p>
+    </div>
+    
+    <div class="stat-card fade-in delay-2" style="flex: 1; text-align: center; display: block;">
+        <i data-lucide="brain" class="stat-icon orange mx-auto mb-2" style="margin: 0 auto; display: flex;"></i>
+        <h3>Smart Suggestions</h3>
+        <p style="font-size: 1rem; color: var(--text-secondary); margin-top: 0.5rem; font-weight: normal;">Let our AI sort out what's really important based on your deadlines.</p>
+    </div>
+    
+    <div class="stat-card fade-in delay-3" style="flex: 1; text-align: center; display: block;">
+        <i data-lucide="bot" class="stat-icon green mx-auto mb-2" style="margin: 0 auto; display: flex;"></i>
+        <h3>AI Assistant</h3>
+        <p style="font-size: 1rem; color: var(--text-secondary); margin-top: 0.5rem; font-weight: normal;">Chat with your personal task assistant to figure out your day.</p>
+    </div>
+</div>
+{% endblock %}

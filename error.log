@@ -1,0 +1,7 @@
+Traceback (most recent call last):
+  File "C:\Users\NAMAN VERMA\OneDrive\Desktop\eco system project\app.py", line 7, in <module>
+    from db import get_db
+  File "C:\Users\NAMAN VERMA\OneDrive\Desktop\eco system project\db.py", line 6
+    \"\"\"
+     ^
+SyntaxError: unexpected character after line continuation character

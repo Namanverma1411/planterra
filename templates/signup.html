@@ -1,0 +1,28 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="auth-container fade-in">
+    <div class="auth-header">
+        <h2>Create an Account</h2>
+        <p style="color: var(--text-secondary); margin-top: 0.5rem;">Start managing your tasks intelligently</p>
+    </div>
+    
+    <form action="{{ url_for('signup') }}" method="POST">
+        <div class="form-group">
+            <label for="email">Email Address</label>
+            <input type="email" id="email" name="email" class="form-control" required placeholder="you@example.com">
+        </div>
+        
+        <div class="form-group">
+            <label for="password">Password</label>
+            <input type="password" id="password" name="password" class="form-control" required placeholder="Create a strong password">
+        </div>
+        
+        <button type="submit" class="btn btn-primary">Sign Up</button>
+    </form>
+    
+    <div class="auth-footer">
+        Already have an account? <a href="{{ url_for('login') }}">Log in here</a>
+    </div>
+</div>
+{% endblock %}

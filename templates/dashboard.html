@@ -1,0 +1,264 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="dashboard-layout">
+    <!-- Sidebar -->
+    <aside class="sidebar">
+        <ul class="sidebar-menu">
+            <li><a href="#" class="active"><i data-lucide="home"></i> Overview</a></li>
+            <li><a href="#" onclick="openModal()"><i data-lucide="plus"></i> Add Task</a></li>
+            <li><a href="#"><i data-lucide="check-square"></i> Completed</a></li>
+            <li><a href="#" onclick="toggleChatbot()"><i data-lucide="bot"></i> AI Assistant</a></li>
+        </ul>
+        <div style="margin-top: auto; padding-top: 2rem; border-top: 1px solid var(--border);">
+            <a href="{{ url_for('logout') }}" style="color: var(--danger); text-decoration: none; display: flex; align-items: center; gap: 0.5rem; font-weight: 500;">
+                <i data-lucide="log-out"></i> Logout
+            </a>
+        </div>
+    </aside>
+
+    <!-- Main Content -->
+    <div class="dashboard-content">
+        <!-- AI Suggestion Banner -->
+        {% if ai_suggestion %}
+        <div class="ai-banner fade-in delay-1">
+            <div class="ai-banner-content">
+                <h3><i data-lucide="sparkles"></i> AI Recommendation</h3>
+                <p>Based on deadlines and priorities, you should focus on: <strong>{{ ai_suggestion.title }}</strong></p>
+            </div>
+            <div>
+                 <form action="{{ url_for('complete_task', task_id=ai_suggestion._id) }}" method="GET" style="display:inline;">
+                    <button type="submit" class="btn btn-success" style="padding: 0.5rem 1rem; font-size: 0.9rem; background: white; color: var(--primary);">Mark Done</button>
+                </form>
+            </div>
+        </div>
+        {% endif %}
+
+        <!-- Stats Overview -->
+        <div class="stats-grid">
+            <div class="stat-card fade-in delay-2">
+                <div class="stat-icon blue"><i data-lucide="list"></i></div>
+                <div class="stat-info">
+                    <h3>Total Tasks</h3>
+                    <p>{{ total }}</p>
+                </div>
+            </div>
+            <div class="stat-card fade-in delay-3">
+                <div class="stat-icon orange"><i data-lucide="clock"></i></div>
+                <div class="stat-info">
+                    <h3>Pending</h3>
+                    <p>{{ pending }}</p>
+                </div>
+            </div>
+            <div class="stat-card fade-in delay-4">
+                <div class="stat-icon green"><i data-lucide="check"></i></div>
+                <div class="stat-info">
+                    <h3>Completed</h3>
+                    <p>{{ completed }}</p>
+                </div>
+            </div>
+        </div>
+
+        <div class="task-controls fade-in delay-5">
+            <h2 style="font-size: 1.5rem; color: var(--text-primary); display: flex; align-items: center; gap: 0.5rem;"><i data-lucide="list-todo"></i> Your Tasks</h2>
+            <button onclick="openModal()" class="btn btn-primary" style="width: auto; padding: 0.5rem 1rem; display: flex; align-items: center; gap: 0.5rem;"><i data-lucide="plus"></i> New Task</button>
+        </div>
+
+        <!-- Task Grid -->
+        <div class="task-grid">
+            {% for task in tasks %}
+            <div class="task-card fade-in delay-5 {% if task.completed %}completed{% endif %}">
+                <div class="task-header">
+                    <h3 class="task-title">{{ task.title }}</h3>
+                    {% if task.priority == "High" %}
+                        <span class="badge badge-high">High</span>
+                    {% elif task.priority == "Medium" %}
+                        <span class="badge badge-medium">Medium</span>
+                    {% else %}
+                        <span class="badge badge-low">Low</span>
+                    {% endif %}
+                </div>
+                
+                <p class="task-desc">{{ task.description or "No description provided." }}</p>
+                
+                <div class="task-footer">
+                    <span class="task-deadline">
+                        <i data-lucide="calendar" class="lucide-sm"></i> 
+                        {% if task.deadline %} {{ task.deadline }} {% else %} No deadline {% endif %}
+                    </span>
+                    
+                    <div class="task-actions">
+                        {% if not task.completed %}
+                        <a href="{{ url_for('complete_task', task_id=task._id) }}" class="btn-icon complete" title="Complete Task">
+                            <i data-lucide="check"></i>
+                        </a>
+                        {% endif %}
+                        <a href="{{ url_for('delete_task', task_id=task._id) }}" class="btn-icon delete" title="Delete Task" onclick="return confirm('Delete this task?');">
+                            <i data-lucide="trash-2"></i>
+                        </a>
+                    </div>
+                </div>
+            </div>
+            {% else %}
+            <div class="fade-in delay-5" style="grid-column: 1 / -1; text-align: center; padding: 4rem 2rem; color: var(--text-secondary); background: var(--surface); border-radius: var(--radius-lg); border: 1px dashed var(--border);">
+                <i data-lucide="package-open" style="width: 48px; height: 48px; margin-bottom: 1rem; opacity: 0.5;"></i>
+                <h3>No tasks found</h3>
+                <p>You're all caught up! Click the 'New Task' button to add a task.</p>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+</div>
+
+<!-- Add Task Modal -->
+<div class="modal" id="taskModal">
+    <div class="modal-content">
+        <i data-lucide="x" class="close-modal" onclick="closeModal()"></i>
+        <h2 class="mb-3">Create New Task</h2>
+        
+        <form action="{{ url_for('add_task') }}" method="POST">
+            <div class="form-group">
+                <label for="title">Task Title</label>
+                <input type="text" id="title" name="title" class="form-control" required placeholder="What needs to be done?">
+            </div>
+            
+            <div class="form-group">
+                <label for="description">Description (Optional)</label>
+                <textarea id="description" name="description" class="form-control" rows="3" placeholder="Add more details..."></textarea>
+            </div>
+            
+            <div style="display: flex; gap: 1rem;">
+                <div class="form-group" style="flex: 1;">
+                    <label for="deadline">Deadline</label>
+                    <input type="date" id="deadline" name="deadline" class="form-control">
+                </div>
+                
+                <div class="form-group" style="flex: 1;">
+                    <label for="priority">Priority</label>
+                    <select id="priority" name="priority" class="form-control" required>
+                        <option value="Low">Low</option>
+                        <option value="Medium" selected>Medium</option>
+                        <option value="High">High</option>
+                    </select>
+                </div>
+            </div>
+            
+            <button type="submit" class="btn btn-primary" style="margin-top: 1rem;">Save Task</button>
+        </form>
+    </div>
+</div>
+
+<!-- AI Chatbot UI -->
+<div class="chatbot-widget">
+    <div class="chatbot-box" id="chatbotBox">
+        <div class="chat-header">
+            <i data-lucide="bot"></i> Smart Assistant
+            <i data-lucide="x" style="margin-left: auto; cursor: pointer;" onclick="toggleChatbot()"></i>
+        </div>
+        <div class="chat-messages" id="chatMessages">
+            <div class="message bot">
+                Hi! Ask me "What should I do today?" and I'll look at your task list to give you a recommendation.
+            </div>
+        </div>
+        <div class="chat-input" style="background:var(--surface);">
+            <input type="text" id="chatInput" placeholder="Ask something..." onkeypress="handleChatEnter(event)">
+            <button onclick="sendMessage()"><i data-lucide="send"></i></button>
+        </div>
+    </div>
+    
+    <div class="chatbot-toggle" onclick="toggleChatbot()">
+        <i data-lucide="message-square"></i>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    // Modal logic
+    const modal = document.getElementById('taskModal');
+    
+    function openModal() {
+        modal.classList.add('active');
+    }
+    
+    function closeModal() {
+        modal.classList.remove('active');
+    }
+    
+    // Close modal on outside click
+    window.onclick = function(event) {
+        if (event.target == modal) {
+            closeModal();
+        }
+    }
+
+    // Chatbot logic
+    const chatbotBox = document.getElementById('chatbotBox');
+    const chatMessages = document.getElementById('chatMessages');
+    const chatInput = document.getElementById('chatInput');
+
+    function toggleChatbot() {
+        chatbotBox.classList.toggle('active');
+        if (chatbotBox.classList.contains('active')) {
+            chatInput.focus();
+        }
+    }
+
+    function appendMessage(text, isUser = false) {
+        const msgDiv = document.createElement('div');
+        msgDiv.classList.add('message');
+        msgDiv.classList.add(isUser ? 'user' : 'bot');
+        msgDiv.innerText = text;
+        chatMessages.appendChild(msgDiv);
+        chatMessages.scrollTop = chatMessages.scrollHeight; // Auto-scroll
+    }
+
+    function handleChatEnter(e) {
+        if (e.key === 'Enter') {
+            sendMessage();
+        }
+    }
+
+    async function sendMessage() {
+        const text = chatInput.value.trim();
+        if (!text) return;
+
+        // User message
+        appendMessage(text, true);
+        chatInput.value = '';
+
+        // Typing indicator
+        const typingId = "typing-" + Date.now();
+        const typingDiv = document.createElement('div');
+        typingDiv.classList.add('message', 'bot');
+        typingDiv.id = typingId;
+        typingDiv.innerText = "...";
+        chatMessages.appendChild(typingDiv);
+        chatMessages.scrollTop = chatMessages.scrollHeight;
+
+        try {
+            const response = await fetch('/api/chat', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ message: text })
+            });
+            const data = await response.json();
+            
+            // Remove typing indicator
+            document.getElementById(typingId).remove();
+            
+            // Bot response
+            if (response.ok) {
+                appendMessage(data.response, false);
+            } else {
+                appendMessage("Oops, I encountered an error.", false);
+            }
+        } catch (error) {
+            document.getElementById(typingId).remove();
+            appendMessage("Could not connect to the server.", false);
+        }
+    }
+</script>
+{% endblock %}
